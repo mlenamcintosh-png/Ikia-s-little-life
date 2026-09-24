@@ -260,6 +260,15 @@
     const duration = document.querySelector('#duration');
 
     ctx.imageSmoothingEnabled = false;
+    const furniture = new Image();
+furniture.onload = () => draw();
+furniture.src = 'assets/furniture.png';
+
+function furnitureSprite(sx, sy, sw, sh, x, y, w, h) {
+  if (furniture.complete && furniture.naturalWidth) {
+    ctx.drawImage(furniture, sx, sy, sw, sh, x, y, w, h);
+  }
+}
 
     let room = 'town';
     let player = { x: 320, y: 335 };
@@ -363,47 +372,15 @@
       }
     }
 
-    function drawLibrary() {
-      rect(0, 0, 640, 400, C.wall);
-      rect(0, 0, 640, 56, C.roofDark);
-      rect(0, 56, 640, 344, C.floor);
+   const furniture = new Image();
+furniture.onload = () => draw();
+furniture.src = 'assets/furniture.png';
 
-      for (let y = 66; y < 400; y += 44) rect(0, y, 640, 2, C.floor2);
-      for (let x = 0; x < 640; x += 60) rect(x, 56, 2, 344, C.floor2);
-
-      shelf(40, 69);
-      shelf(162, 69);
-      shelf(406, 69);
-      shelf(522, 69);
-
-      rect(265, 73, 110, 69, C.trim);
-      rect(271, 79, 98, 57, '#b9d9cd');
-      rect(319, 79, 3, 57, C.trim);
-      rect(270, 108, 100, 3, C.trim);
-
-      rect(205, 230, 230, 55, C.wood);
-      rect(213, 232, 214, 44, '#cda081');
-      rect(191, 264, 21, 53, '#744961');
-      rect(427, 264, 21, 53, '#744961');
-
-      for (const x of [252, 342]) {
-        rect(x, 299, 48, 13, C.roofDark);
-        rect(x+5, 311, 38, 28, C.roof);
-        rect(x+10, 338, 6, 15, C.dark);
-        rect(x+32, 338, 6, 15, C.dark);
-      }
-
-      rect(301, 237, 39, 4, '#fdf1df');
-      rect(307, 226, 27, 11, '#fff9ed');
-      rect(307, 226, 2, 11, '#d293a6');
-      rect(363, 235, 7, 12, '#7eac78');
-      blossom(366, 235);
-
-      rect(289, 377, 62, 23, C.roofDark);
-      rect(295, 377, 50, 23, '#f6e8d6');
-      text('EXIT', 320, 394, 12);
-      text('Petal Library', 320, 31, 19, '#fff8ec');
-    }
+function furnitureSprite(sx, sy, sw, sh, x, y, w, h) {
+  if (furniture.complete && furniture.naturalWidth) {
+    ctx.drawImage(furniture, sx, sy, sw, sh, x, y, w, h);
+  }
+}
 
     function drawPlayer() {
       const { x, y } = player;
