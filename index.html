@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Petal Pages · Explore the pixel world</title>
+  <style>
+    :root {
+      font-family: system-ui, sans-serif;
+      color: #533c51;
+      background: #fff7fb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    .site {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .side {
+      background: #fff;
+      border-right: 1px solid #f3dce8;
+      padding: 28px 16px;
+    }
+    .logo {
+      font-weight: 900;
+      color: #dc80a7;
+      font-size: 23px;
+      line-height: .9;
+      letter-spacing: -.06em;
+      margin: 6px 10px 40px;
+    }
+    .logo span { color: #92ab74; }
+    .nav-item {
+      display: block;
+      background: #ffdce9;
+      color: #834868;
+      border-radius: 24px;
+      padding: 12px 16px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .site-main { padding: 26px clamp(16px, 4vw, 50px) 45px; }
+    .wrap { width: min(100%, 920px); margin: auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .intro {
+      font-size: 15px;
+      color: #816978;
+      line-height: 1.5;
+      margin: 0 0 18px;
+    }
+    h1 {
+      font-size: clamp(22px, 4vw, 34px);
+      margin: 0;
+      color: #a5577e;
+    }
+    header span { font-size: 14px; color: #806675; }
+    .card {
+      background: #fff;
+      border: 2px solid #f3c9dc;
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 15px 35px #b5648730;
+    }
+    .game {
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #d0e8ab;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+    .prompt {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      background: #fffdf9;
+      border: 2px solid #af6b8b;
+      border-radius: 10px;
+      padding: 9px 15px;
+      text-align: center;
+      box-shadow: 0 5px 0 #975c74;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .hidden { display: none !important; }
+    .bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 3px 1px;
+      font-size: 14px;
+      color: #796370;
+    }
+    .bar button, .controls button, .timer button {
+      border: 2px solid #b96f92;
+      border-radius: 10px;
+      background: #ffe1ec;
+      color: #693c59;
+      padding: 9px 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .bar button:hover, .controls button:hover, .timer button:hover {
+      background: #ffc9dd;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, 48px);
+      gap: 5px;
+      width: max-content;
+      margin: 12px auto 0;
+    }
+    .controls button { padding: 10px 0; touch-action: none; }
+    .controls .up { grid-column: 2; }
+    .controls .left { grid-column: 1; }
+    .controls .down { grid-column: 2; }
+    .controls .right { grid-column: 3; }
+    .timer {
+      position: absolute;
+      inset: 0;
+      background: #493649a8;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .timer-panel {
+      background: #fffafc;
+      border: 4px solid #c581a2;
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 10px 0 #744d68;
+    }
+    .timer-panel h2 { margin: 0 0 8px; font-size: 23px; }
+    .timer-panel p { font-size: 14px; color: #756372; }
+    .clock {
+      font-variant-numeric: tabular-nums;
+      font-size: 56px;
+      font-weight: 800;
+      margin: 10px 0;
+      color: #a4537b;
+    }
+    .timer-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .timer label { display: block; font-size: 13px; margin: 6px 0; }
+    .timer select {
+      font: inherit;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #d7a3bb;
+    }
+    @media (max-width: 700px) {
+      .site { display: block; }
+      .side {
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo { margin: 0; font-size: 20px; }
+      .nav-item { padding: 9px 14px; }
+      .site-main { padding: 20px 14px 40px; }
+    }
+    @media (max-width: 560px) {
+      .prompt { font-size: 12px; white-space: normal; width: 85%; }
+      .bar { font-size: 12px; }
+      .clock { font-size: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site">
+    <aside class="side">
+      <div class="logo">PETAL<br><span>PAGES</span></div>
+      <a class="nav-item" href="#world">✿ &nbsp; Explore</a>
+    </aside>
+
+    <main class="site-main">
+      <div class="wrap">
+        <header>
+          <h1>Explore Petal Pages</h1>
+          <span>Pixel world · Library</span>
+        </header>
+        <p class="intro">Walk through the little town and step inside the library to study.</p>
+
+        <div class="card">
+          <div class="game">
+            <canvas id="world" width="640" height="400"
+              aria-label="Pixel world game: walk to the library and enter it"></canvas>
+            <div id="prompt" class="prompt hidden"></div>
+
+            <div id="timer" class="timer hidden" role="dialog"
+              aria-modal="true" aria-label="Study timer">
+              <div class="timer-panel">
+                <h2>Library study desk</h2>
+                <p>Settle in for a little study session.</p>
+                <label for="duration">
+                  Study for
+                  <select id="duration">
+                    <option value="15">15 minutes</option>
+                    <option value="25" selected>25 minutes</option>
+                    <option value="45">45 minutes</option>
+                  </select>
+                </label>
+                <div class="clock" id="clock">25:00</div>
+                <div class="timer-actions">
+                  <button id="start">Start</button>
+                  <button id="reset">Reset</button>
+                  <button id="leave-desk">Leave desk</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bar">
+            <span id="status">Use arrow keys or WASD to walk. Press E to interact.</span>
+            <button id="interact">Interact · E</button>
+          </div>
+        </div>
+
+        <div class="controls" aria-label="Touch movement controls">
+          <button class="up" data-dir="up" aria-label="Walk up">▲</button>
+          <button class="left" data-dir="left" aria-label="Walk left">◀</button>
+          <button class="down" data-dir="down" aria-label="Walk down">▼</button>
+          <button class="right" data-dir="right" aria-label="Walk right">▶</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const canvas = document.querySelector('#world');
+    const ctx = canvas.getContext('2d');
+    const prompt = document.querySelector('#prompt');
+    const status = document.querySelector('#status');
+    const timer = document.querySelector('#timer');
+    const clock = document.querySelector('#clock');
+    const duration = document.querySelector('#duration');
+
+    ctx.imageSmoothingEnabled = false;
+
+    let room = 'town';
+    let player = { x: 320, y: 335 };
+    let seconds = 1500;
+    let active = false;
+    let interval = null;
+
+    const C = {
+      grass: '#d5e7ae', grass2: '#c7dda0',
+      path: '#efdfc6', path2: '#e3cfb3',
+      wall: '#f8d9e5', roof: '#d787aa',
+      roofDark: '#ac648a', trim: '#fff5ed',
+      wood: '#a87861', floor: '#ead7be',
+      floor2: '#e2c9aa', dark: '#744961',
+      leaf: '#8bb46a', leaf2: '#719655',
+      flower: '#fa9dbb', gold: '#f4c66d'
+    };
+
+    function rect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), w, h);
+    }
+
+    function text(s, x, y, size = 14, color = C.dark) {
+      ctx.fillStyle = color;
+      ctx.font = `bold ${size}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText(s, x, y);
+    }
+
+    function blossom(x, y) {
+      rect(x-2, y-8, 4, 12, C.leaf2);
+      rect(x-6, y-12, 5, 5, C.flower);
+      rect(x+2, y-12, 5, 5, C.flower);
+      rect(x-2, y-16, 5, 5, '#ffd9e8');
+      rect(x-1, y-11, 3, 3, C.gold);
+    }
+
+    function tree(x, y) {
+      rect(x-3, y+12, 6, 17, C.wood);
+      rect(x-17, y-6, 34, 22, C.leaf2);
+      rect(x-13, y-13, 26, 21, C.leaf);
+      rect(x-6, y-19, 14, 11, C.leaf2);
+    }
+
+    function drawTown() {
+      rect(0, 0, 640, 400, C.grass);
+
+      for (let y = 0; y < 400; y += 32) {
+        for (let x = 0; x < 640; x += 32) {
+          if ((x*7 + y*3) % 5 === 0) rect(x+7, y+9, 3, 3, C.grass2);
+        }
+      }
+
+      rect(280, 218, 80, 182, C.path);
+      for (let y = 225; y < 400; y += 29) rect(280, y, 80, 2, C.path2);
+      rect(160, 215, 320, 25, C.path);
+      for (let x = 170; x < 470; x += 31) rect(x, 217, 2, 23, C.path2);
+
+      for (const [x, y] of [[60,72],[107,110],[545,74],[581,155],[65,292],[547,318]]) {
+        tree(x, y);
+      }
+      for (const [x, y] of [[35,205],[89,235],[125,337],[509,236],[549,270],[595,358],[172,321],[467,350]]) {
+        blossom(x, y);
+      }
+
+      rect(213, 94, 214, 128, C.roofDark);
+      rect(219, 100, 202, 116, C.wall);
+      rect(200, 84, 240, 44, C.roofDark);
+      rect(211, 71, 218, 49, C.roof);
+      rect(222, 84, 196, 9, '#eaa8c1');
+      rect(214, 125, 212, 8, C.trim);
+
+      for (const x of [241, 363]) {
+        rect(x, 145, 37, 36, C.trim);
+        rect(x+4, 149, 29, 28, '#a2c9c2');
+        rect(x+17, 149, 3, 28, C.trim);
+        rect(x+4, 161, 29, 3, C.trim);
+      }
+
+      rect(300, 150, 41, 69, C.wood);
+      rect(306, 156, 29, 62, '#d8a686');
+      rect(328, 186, 4, 4, C.gold);
+      rect(236, 51, 168, 29, '#fff0df');
+      text('PETAL LIBRARY', 320, 71, 16);
+
+      for (let i = 0; i < 8; i++) blossom(204+i*32, 240);
+      text('Walk to the library door', 320, 28, 15);
+    }
+
+    function shelf(x, y) {
+      rect(x, y, 95, 13, C.wood);
+      rect(x, y+13, 95, 53, '#a77765');
+
+      for (let row = 0; row < 2; row++) {
+        rect(x+4, y+17+row*23, 87, 3, '#714f51');
+        for (let i = 0; i < 8; i++) {
+          const colors = ['#c87792','#839e7c','#f1bd77','#987fa4'];
+          rect(x+8+i*10, y+3+row*25, 6, 14, colors[i%4]);
+        }
+      }
+    }
+
+    function drawLibrary() {
+      rect(0, 0, 640, 400, C.wall);
+      rect(0, 0, 640, 56, C.roofDark);
+      rect(0, 56, 640, 344, C.floor);
+
+      for (let y = 66; y < 400; y += 44) rect(0, y, 640, 2, C.floor2);
+      for (let x = 0; x < 640; x += 60) rect(x, 56, 2, 344, C.floor2);
+
+      shelf(40, 69);
+      shelf(162, 69);
+      shelf(406, 69);
+      shelf(522, 69);
+
+      rect(265, 73, 110, 69, C.trim);
+      rect(271, 79, 98, 57, '#b9d9cd');
+      rect(319, 79, 3, 57, C.trim);
+      rect(270, 108, 100, 3, C.trim);
+
+      rect(205, 230, 230, 55, C.wood);
+      rect(213, 232, 214, 44, '#cda081');
+      rect(191, 264, 21, 53, '#744961');
+      rect(427, 264, 21, 53, '#744961');
+
+      for (const x of [252, 342]) {
+        rect(x, 299, 48, 13, C.roofDark);
+        rect(x+5, 311, 38, 28, C.roof);
+        rect(x+10, 338, 6, 15, C.dark);
+        rect(x+32, 338, 6, 15, C.dark);
+      }
+
+      rect(301, 237, 39, 4, '#fdf1df');
+      rect(307, 226, 27, 11, '#fff9ed');
+      rect(307, 226, 2, 11, '#d293a6');
+      rect(363, 235, 7, 12, '#7eac78');
+      blossom(366, 235);
+
+      rect(289, 377, 62, 23, C.roofDark);
+      rect(295, 377, 50, 23, '#f6e8d6');
+      text('EXIT', 320, 394, 12);
+      text('Petal Library', 320, 31, 19, '#fff8ec');
+    }
+
+    function drawPlayer() {
+      const { x, y } = player;
+      rect(x-7, y+11, 15, 4, '#70546850');
+      rect(x-6, y-12, 13, 13, '#eec6a2');
+      rect(x-8, y-15, 17, 7, C.dark);
+      rect(x-8, y-9, 3, 8, C.dark);
+      rect(x+6, y-9, 3, 8, C.dark);
+      rect(x-1, y-6, 2, 2, C.dark);
+      rect(x+4, y-6, 2, 2, C.dark);
+      rect(x-7, y+1, 15, 11, '#d46e9a');
+      rect(x-5, y+12, 5, 5, C.dark);
+      rect(x+3, y+12, 5, 5, C.dark);
+    }
+
+    function near() {
+      if (room === 'town') {
+        return Math.abs(player.x-320) < 32 && Math.abs(player.y-240) < 25;
+      }
+      if (Math.abs(player.x-320) < 95 && player.y > 290 && player.y < 367) {
+        return 'desk';
+      }
+      if (player.y > 357 && Math.abs(player.x-320) < 52) {
+        return 'exit';
+      }
+      return null;
+    }
+
+    function draw() {
+      if (room === 'town') drawTown();
+      else drawLibrary();
+
+      drawPlayer();
+      const nearby = near();
+      prompt.classList.toggle('hidden', !nearby || !timer.classList.contains('hidden'));
+      prompt.textContent = nearby === 'desk'
+        ? 'Press E to sit and study'
+        : nearby === 'exit'
+          ? 'Press E to leave the library'
+          : nearby
+            ? 'Press E to enter the library'
+            : '';
+    }
+
+    function move(dir) {
+      if (!timer.classList.contains('hidden')) return;
+
+      let dx = 0, dy = 0;
+      if (dir === 'left') dx = -8;
+      if (dir === 'right') dx = 8;
+      if (dir === 'up') dy = -8;
+      if (dir === 'down') dy = 8;
+
+      const nx = Math.max(13, Math.min(627, player.x+dx));
+      const ny = Math.max(78, Math.min(378, player.y+dy));
+
+      if (room === 'town' && ny < 234 && ny > 86 && nx > 198 && nx < 442) return;
+      if (room === 'library' && nx > 191 && nx < 448 && ny > 220 && ny < 300) return;
+
+      player.x = nx;
+      player.y = ny;
+      draw();
+    }
+
+    function interact() {
+      const nearby = near();
+
+      if (room === 'town' && nearby) {
+        room = 'library';
+        player = { x: 320, y: 352 };
+        status.textContent = 'Welcome to the library. Walk up to a chair and press E.';
+      } else if (nearby === 'exit') {
+        room = 'town';
+        player = { x: 320, y: 253 };
+        status.textContent = 'Back outside. Visit the library whenever you like.';
+      } else if (nearby === 'desk') {
+        timer.classList.remove('hidden');
+        status.textContent = 'Take a seat and study.';
+        document.querySelector('#start').focus();
+      }
+
+      draw();
+    }
+
+    function display() {
+      clock.textContent =
+        `${String(Math.floor(seconds/60)).padStart(2,'0')}:` +
+        `${String(seconds%60).padStart(2,'0')}`;
+    }
+
+    function stop() {
+      clearInterval(interval);
+      interval = null;
+      active = false;
+      document.querySelector('#start').textContent = 'Start';
+    }
+
+    duration.addEventListener('change', () => {
+      stop();
+      seconds = Number(duration.value) * 60;
+      display();
+    });
+
+    document.querySelector('#start').addEventListener('click', () => {
+      if (active) {
+        stop();
+        return;
+      }
+      active = true;
+      document.querySelector('#start').textContent = 'Pause';
+      interval = setInterval(() => {
+        seconds--;
+        display();
+        if (seconds <= 0) {
+          stop();
+          status.textContent = 'Study session complete. Nice work!';
+          alert('Study session complete. Nice work!');
+        }
+      }, 1000);
+    });
+
+    document.querySelector('#reset').addEventListener('click', () => {
+      stop();
+      seconds = Number(duration.value) * 60;
+      display();
+    });
+
+    document.querySelector('#leave-desk').addEventListener('click', () => {
+      stop();
+      timer.classList.add('hidden');
+      draw();
+    });
+
+    document.querySelector('#interact').addEventListener('click', interact);
+
+    document.querySelectorAll('[data-dir]').forEach(button => {
+      let hold;
+      button.addEventListener('pointerdown', event => {
+        event.preventDefault();
+        move(button.dataset.dir);
+        hold = setInterval(() => move(button.dataset.dir), 105);
+        button.setPointerCapture(event.pointerId);
+      });
+      for (const eventName of ['pointerup','pointercancel','lostpointercapture']) {
+        button.addEventListener(eventName, () => clearInterval(hold));
+      }
+    });
+
+    addEventListener('keydown', event => {
+      if (!timer.classList.contains('hidden')) {
+        if (event.key === 'Escape') {
+          document.querySelector('#leave-desk').click();
+        }
+        return;
+      }
+
+      const dirs = {
+        ArrowUp: 'up', ArrowDown: 'down',
+        ArrowLeft: 'left', ArrowRight: 'right',
+        w: 'up', s: 'down', a: 'left', d: 'right'
+      };
+
+      if (dirs[event.key]) {
+        event.preventDefault();
+        move(dirs[event.key]);
+      }
+      if (event.key.toLowerCase() === 'e' || event.key === 'Enter') {
+        interact();
+      }
+    });
+
+    display();
+    draw();
+  </script>
+</body>
+</html>
